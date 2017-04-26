@@ -1,0 +1,16 @@
+{
+    "config": {
+        "bin-dir": "bin"
+    },
+    "autoload": {
+        "psr-0": {
+            "": [
+                "src"
+            ]
+        }
+    },
+    "require-dev": {
+        "behat/behat": "^3.3",
+        "phpspec/phpspec": "^3.2"
+    }
+}
