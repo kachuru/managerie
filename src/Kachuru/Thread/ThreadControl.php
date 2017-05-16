@@ -4,9 +4,9 @@ namespace Kachuru\Thread;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Multi
+class ThreadControl
 {
-    private $signal;
+    private $threadsNumber;
 
     private $output;
 
@@ -14,9 +14,9 @@ class Multi
 
     private $finishedThreadCount = 0;
 
-    public function __construct(Signal $signal, OutputInterface $output)
+    public function __construct(int $threadsNumber, OutputInterface $output)
     {
-        $this->signal = $signal;
+        $this->threadsNumber = $threadsNumber;
         $this->output = $output;
     }
 
@@ -25,11 +25,11 @@ class Multi
         do {
             $this->handleStartingThreads($runScript, $timesToRun);
             $this->handleFinishedThreads($timesToRun);
-            $this->signal->tick($sleepTime);
+            usleep($sleepTime);
         } while ($this->shouldBeRunning());
     }
 
-    protected function handleStartingThreads(ThreadableScript $runScript, $timesToRun): void
+    protected function handleStartingThreads(ThreadableScript $runScript, int $timesToRun): void
     {
         if ($this->threadsUnderAllowedNumber() && !$this->timesToRunReached($timesToRun)) {
             $this->spawn($runScript);
@@ -45,8 +45,8 @@ class Multi
             unset($this->threads[array_search($finishedPid, $this->threads)]);
             ++$this->finishedThreadCount;
 
-            if ($this->timesToRunReached($timesToRun) && $this->signal->getThreadsLimit() > 0) {
-                $this->signal->stopAllThreads();
+            if ($this->timesToRunReached($timesToRun) && $this->threadsNumber > 0) {
+                $this->threadsNumber = 0;
             }
         }
     }
@@ -75,7 +75,7 @@ class Multi
 
     private function threadsUnderAllowedNumber(): bool
     {
-        return $this->getThreadCount() < $this->signal->getThreadsLimit();
+        return $this->getThreadCount() < $this->threadsNumber;
     }
 
     private function getThreadCount(): int
@@ -95,7 +95,7 @@ class Multi
 
     private function shouldBeRunning(): bool
     {
-        return $this->signal->getThreadsLimit() > 0 || $this->getThreadCount() > 0;
+        return $this->threadsNumber > 0 || $this->getThreadCount() > 0;
     }
 
     private function writeln($message)

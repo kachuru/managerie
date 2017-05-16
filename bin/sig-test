@@ -14,17 +14,11 @@ $runTimes = isset($argv[1]) && is_numeric($argv[1])
     : 5;
 
 $output = new Symfony\Component\Console\Output\ConsoleOutput(
-        Symfony\Component\Console\Output\OutputInterface::VERBOSITY_NORMAL
+    Symfony\Component\Console\Output\OutputInterface::VERBOSITY_NORMAL
 );
 
 $output->writeln(sprintf('Starting with process ID: %s', getmypid()));
 
-(new Kachuru\Thread\Multi(
-    new Kachuru\Thread\Signal(
-        new Kachuru\Thread\Config(3, 10, 1),
-        $output
-    ),
-    $output
-))->run(new \Kachuru\Thread\Test($output), $runTimes, 100000);
+(new Kachuru\Thread\ThreadControl(3, $output))->run(new \Kachuru\Thread\Test($output), $runTimes, 100000);
 
 $output->writeln('Finished');
