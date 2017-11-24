@@ -1,4 +1,4 @@
-bin/
-!bin/sig-test
-composer.phar
-vendor/
+/bin/*
+!/bin/sig-test
+/composer.phar
+/vendor/

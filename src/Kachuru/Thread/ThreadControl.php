@@ -14,13 +14,13 @@ class ThreadControl
 
     private $finishedThreadCount = 0;
 
-    public function __construct(int $threadsNumber, OutputInterface $output)
+    public function __construct(ThreadsNumber $threadsNumber, OutputInterface $output)
     {
         $this->threadsNumber = $threadsNumber;
         $this->output = $output;
     }
 
-    public function run(ThreadableScript $runScript, int $timesToRun, int $sleepTime)
+    public function run(ThreadableScript $runScript, int $timesToRun, int $sleepTime): void
     {
         do {
             $this->handleStartingThreads($runScript, $timesToRun);
@@ -45,13 +45,13 @@ class ThreadControl
             unset($this->threads[array_search($finishedPid, $this->threads)]);
             ++$this->finishedThreadCount;
 
-            if ($this->timesToRunReached($timesToRun) && $this->threadsNumber > 0) {
-                $this->threadsNumber = 0;
+            if ($this->timesToRunReached($timesToRun) && $this->threadsNumber->getThreadsNumber() > 0) {
+                $this->threadsNumber->endAllProcessing();
             }
         }
     }
 
-    protected function spawn(ThreadableScript $runScript)
+    protected function spawn(ThreadableScript $runScript): int
     {
         $pid = pcntl_fork();
 
@@ -75,7 +75,7 @@ class ThreadControl
 
     private function threadsUnderAllowedNumber(): bool
     {
-        return $this->getThreadCount() < $this->threadsNumber;
+        return $this->getThreadCount() < $this->threadsNumber->getThreadsNumber();
     }
 
     private function getThreadCount(): int
@@ -83,7 +83,7 @@ class ThreadControl
         return count($this->threads);
     }
 
-    private function getTotalThreadCount()
+    private function getTotalThreadCount(): int
     {
         return $this->getThreadCount() + $this->finishedThreadCount;
     }
@@ -95,10 +95,10 @@ class ThreadControl
 
     private function shouldBeRunning(): bool
     {
-        return $this->threadsNumber > 0 || $this->getThreadCount() > 0;
+        return $this->threadsNumber->getThreadsNumber() > 0 || $this->getThreadCount() > 0;
     }
 
-    private function writeln($message)
+    private function writeln($message): void
     {
         $this->output->writeln(sprintf('[%d] %s', getmypid(), $message), OutputInterface::VERBOSITY_VERBOSE);
     }

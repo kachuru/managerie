@@ -2,7 +2,7 @@
 
 namespace Kachuru\Thread;
 
-class Config
+class VariableThreadsConfig
 {
     private $startThreads;
 

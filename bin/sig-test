@@ -19,6 +19,9 @@ $output = new Symfony\Component\Console\Output\ConsoleOutput(
 
 $output->writeln(sprintf('Starting with process ID: %s', getmypid()));
 
-(new Kachuru\Thread\ThreadControl(3, $output))->run(new \Kachuru\Thread\Test($output), $runTimes, 100000);
+(new Kachuru\Thread\ThreadControl(
+    new Kachuru\Thread\StaticThreadsNumber(3),
+    $output
+))->run(new \Kachuru\Thread\Test($output), $runTimes, 100000);
 
 $output->writeln('Finished');
