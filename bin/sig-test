@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+foreach (['../../../autoload.php', '../vendor/autoload.php', 'vendor/autoload.php'] as $file) {
+    if (file_exists(__DIR__ . '/' . $file)) {
+        require __DIR__ . '/' . $file;
+        unset($file);
+        break;
+    }
+}
+
+$runTimes = isset($argv[1]) && is_numeric($argv[1])
+    ? $argv[1]
+    : 5;
+
+$output = new Kachuru\Thread\ConsoleWriter(
+    Symfony\Component\Console\Output\OutputInterface::VERBOSITY_NORMAL
+);
+
+$output->writeln(sprintf('Starting with process ID: %s', getmypid()));
+
+(new Kachuru\Thread\ThreadControl(
+    new Kachuru\Thread\StaticThreadsNumber(3),
+    $output
+))->run(new \Kachuru\Thread\Test($output), $runTimes, 100000);

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="thread.config" class="Kachuru\Thread\Config">
+            <argument><![CDATA[3]]></argument>
+            <argument><![CDATA[5]]></argument>
+            <argument><![CDATA[1]]></argument>
+        </service>
+
+        <service id="thread.multi" class="Kachuru\Thread\Multi">
+            <argument type="service" id="thread.config"/>
+        </service>
+
+    </services>
+</container>
