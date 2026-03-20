@@ -4,5 +4,5 @@ namespace Kachuru\Thread;
 
 interface ThreadableScript
 {
-    public function run();
+    public function run(): void;
 }

@@ -1,4 +1,5 @@
 /bin/*
 !/bin/sig-test
 /composer.phar
+/composer.lock
 /vendor/

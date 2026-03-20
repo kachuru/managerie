@@ -6,13 +6,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SignalControlledThreadsNumber implements ThreadsNumber
 {
-    private $config;
+    private int $threadsNumber;
 
-    private $output;
-
-    private $threadsNumber;
-
-    private $signalActions = [
+    private const SIGNAL_ACTIONS = [
         SIGINT => 'terminateAllThreads',
         SIGHUP => 'terminateAllThreads',
         SIGTERM => 'terminateAllThreads',
@@ -20,14 +16,13 @@ class SignalControlledThreadsNumber implements ThreadsNumber
         SIGUSR2 => 'removeThread',
     ];
 
-    public function __construct(VariableThreadsConfig $config, OutputInterface $output)
-    {
-        $this->config = $config;
-        $this->output = $output;
-
+    public function __construct(
+        private readonly VariableThreadsConfig $config,
+        private readonly OutputInterface $output
+    ) {
         $this->threadsNumber = $config->getStartThreads();
 
-        foreach (array_keys($this->signalActions) as $trapSignal) {
+        foreach (array_keys(self::SIGNAL_ACTIONS) as $trapSignal) {
             pcntl_signal($trapSignal, array($this, 'trapSignal'));
         }
     }
@@ -37,12 +32,12 @@ class SignalControlledThreadsNumber implements ThreadsNumber
         return $this->threadsNumber;
     }
 
-    public function tick()
+    public function tick(): void
     {
         pcntl_signal_dispatch();
     }
 
-    public function terminateAllThreads()
+    public function terminateAllThreads(): void
     {
         $this->writeln('Terminating all children');
         $this->endAllProcessing();
@@ -54,12 +49,12 @@ class SignalControlledThreadsNumber implements ThreadsNumber
         $this->writeln('Waiting for all children to finish');
     }
 
-    protected function trapSignal(int $signal)
+    protected function trapSignal(int $signal): void
     {
-        call_user_func([$this, $this->signalActions[$signal]]);
+        call_user_func([$this, self::SIGNAL_ACTIONS[$signal]]);
     }
 
-    protected function addThread()
+    protected function addThread(): void
     {
         if ($this->threadsNumber < $this->config->getMaxThreads()) {
             $this->threadsNumber++;
@@ -67,7 +62,7 @@ class SignalControlledThreadsNumber implements ThreadsNumber
         }
     }
 
-    protected function removeThread()
+    protected function removeThread(): void
     {
         if ($this->threadsNumber > $this->config->getMinThreads()) {
             $this->threadsNumber--;
@@ -75,7 +70,7 @@ class SignalControlledThreadsNumber implements ThreadsNumber
         }
     }
 
-    private function writeln($message)
+    private function writeln(string $message): void
     {
         $this->output->writeln(sprintf('[%d] %s', getmypid(), $message), OutputInterface::VERBOSITY_VERBOSE);
     }
