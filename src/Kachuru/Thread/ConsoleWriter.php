@@ -6,11 +6,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ConsoleWriter extends ConsoleOutput
 {
-    private $aperture = 1;
+    private int $aperture = 1;
 
-    /**
-     * @param int $lines
-     */
     public function setAperture(int $lines = 1): void
     {
         for ($i = 1; $i <= $lines; $i++) {
@@ -19,7 +16,7 @@ class ConsoleWriter extends ConsoleOutput
         $this->aperture = $lines;
     }
 
-    public function writeOnRow($message, $row, $offset = 0)
+    public function writeOnRow(string $message, int $row, int $offset = 0): void
     {
         $this->up($this->aperture + 1 - $row);
         if ($offset > 0) {
@@ -29,27 +26,27 @@ class ConsoleWriter extends ConsoleOutput
         $this->down($this->aperture + 1 - $row);
     }
 
-    function up($n = 1)
+    public function up(int $n = 1): void
     {
         $this->move($n, 'A');
     }
 
-    function down($n = 1)
+    public function down(int $n = 1): void
     {
         $this->move($n, 'B');
     }
 
-    function right($n = 1)
+    public function right(int $n = 1): void
     {
         $this->move($n, 'C');
     }
 
-    function left($n = 1)
+    public function left(int $n = 1): void
     {
         $this->move($n, 'D');
     }
 
-    function move($n, $d)
+    private function move(int $n, string $d): void
     {
         echo "\033[".$n.$d;
     }

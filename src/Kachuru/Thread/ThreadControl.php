@@ -4,20 +4,15 @@ namespace Kachuru\Thread;
 
 class ThreadControl
 {
-    private $threadsNumber;
+    /** @var int[] $threads */
+    private array $threads = [];
+    private int $finishedThreadCount = 0;
+    private int $lastRowPosition = 0;
 
-    private $output;
-
-    private $threads = [];
-
-    private $finishedThreadCount = 0;
-
-    private $lastRowPosition = 0;
-
-    public function __construct(ThreadsNumber $threadsNumber, ConsoleWriter $output)
-    {
-        $this->threadsNumber = $threadsNumber;
-        $this->output = $output;
+    public function __construct(
+        private readonly ThreadsNumber $threadsNumber,
+        private readonly ConsoleWriter $output
+    ) {
         $this->output->setAperture($this->threadsNumber->getThreadsNumber());
     }
 
@@ -37,11 +32,12 @@ class ThreadControl
         }
     }
 
-    protected function handleFinishingThreads($timesToRun): void
+    protected function handleFinishingThreads(int $timesToRun): void
     {
         $finishedPid = pcntl_waitpid(0, $status, WNOHANG);
         if ($finishedPid > 0) {
-            $this->lastRowPosition = array_search($finishedPid, $this->threads) + 1;
+            $result = array_search($finishedPid, $this->threads);
+            $this->lastRowPosition = (int)$result + 1;
             $this->writeOnRow(
                 sprintf('Thread %d has finished with status %d', $finishedPid, $status),
                 $this->lastRowPosition
@@ -73,7 +69,8 @@ class ThreadControl
         // Parent continues the thread handling
         $this->threads[] = $pid;
 
-        $row = $this->findRow($pid);
+        $row = $this->findRow();
+
         $this->writeOnRow(
             sprintf('Forked %d; %d threads; %dB consumed', $pid, $this->getThreadCount(), memory_get_usage()),
             $row
@@ -96,7 +93,7 @@ class ThreadControl
         return $this->getThreadCount() + $this->finishedThreadCount;
     }
 
-    private function timesToRunReached($timesToRun): bool
+    private function timesToRunReached(int $timesToRun): bool
     {
         return $timesToRun > 0 && $this->getTotalThreadCount() == $timesToRun;
     }
@@ -106,12 +103,12 @@ class ThreadControl
         return $this->threadsNumber->getThreadsNumber() > 0 || $this->getThreadCount() > 0;
     }
 
-    private function writeOnRow($message, $row = 1): void
+    private function writeOnRow(string $message, int $row = 1): void
     {
         $this->output->writeOnRow(sprintf('[%d] %s', getmypid(), $message), $row, 0);
     }
 
-    protected function findRow($pid): int
+    protected function findRow(): int
     {
         return ($this->lastRowPosition > 0) ? $this->lastRowPosition : $this->getThreadCount();
     }
